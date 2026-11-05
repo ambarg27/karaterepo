@@ -1,0 +1,6 @@
+{
+  "errorCode": "#string",
+  "message": "#string",
+  "details": "#array",
+  "correlationId": "#string"
+}

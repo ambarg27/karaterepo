@@ -1,0 +1,87 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.qte.ttp.karate'
+version = '1.0.0-SNAPSHOT'
+sourceCompatibility = '11'
+
+repositories {
+    maven { url "https://maven-central.storage-download.googleapis.com/maven2/" }
+    mavenCentral()
+    gradlePluginPortal()
+}
+
+dependencies {
+    testImplementation('org.junit.jupiter:junit-jupiter-api:5.14.4')
+    testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.14.4')
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher:1.14.4')
+    testImplementation 'com.intuit.karate:karate-junit5:1.4.1'
+}
+
+/*
+ * Shared settings for every Karate lane: JUnit Platform, forwarding of the
+ * TTP environment/credential system properties, and console logging. The TTP
+ * credentials themselves come from the TTP_USER / TTP_PASSWORD
+ * environment variables, which the forked test JVM inherits.
+ */
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+    ['karate.options', 'karate.env', 'environment', 'ttp.tag',
+     'ttp.baseurl', 'ttp.user', 'ttp.password', 'ttp.admintoken',
+     'ttp.ignoretlserrors'].each { propertyName ->
+        def propertyValue = System.properties.getProperty(propertyName)
+        if (propertyValue != null) {
+            systemProperty propertyName, propertyValue
+        }
+    }
+    outputs.upToDateWhen { false }
+    testLogging.showStandardStreams = true
+}
+
+/*
+ * Default lane (`./gradlew clean test`): the TTP readonly runner
+ * (ttp.TtpApiTest) and the TTP mutating runner (ttp.TtpMutatingTest). The
+ * destructive reset/seed runner is excluded here and only runs through the
+ * opt-in ttpExclusiveTest task.
+ */
+test {
+    filter {
+        includeTestsMatching 'ttp.*'
+        excludeTestsMatching 'ttp.TtpExclusiveTest'
+    }
+}
+
+/*
+ * Convenience alias for the default TTP lane.
+ */
+tasks.register('ttpTest') {
+    group = 'verification'
+    description = 'Runs the default TTP lane (readonly + mutating runners).'
+    dependsOn tasks.named('test')
+}
+
+/*
+ * Opt-in destructive lane: TTP-API-070..075 reset and reseed the shared
+ * in-memory store, so they run only on a dedicated instance or in a
+ * maintenance window.
+ */
+tasks.register('ttpExclusiveTest', Test) {
+    group = 'verification'
+    description = 'Runs the destructive TTP reset/seed lane (ttp.TtpExclusiveTest) only.'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    filter {
+        includeTestsMatching 'ttp.TtpExclusiveTest'
+    }
+}
+
+sourceSets {
+    test {
+        resources {
+            srcDir file('src/test/java')
+         //   exclude '**/*.java'
+        }
+
+    }
+}

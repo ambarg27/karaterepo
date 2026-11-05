@@ -1,0 +1,13 @@
+{
+  "id": "#string",
+  "contactId": "#string",
+  "itemIds": "#[] #string",
+  "tier": "#string",
+  "startDate": "#string",
+  "endDate": "#string",
+  "status": "#string",
+  "options": "#array",
+  "notes": "##string",
+  "total": "#number",
+  "createdAt": "#string"
+}

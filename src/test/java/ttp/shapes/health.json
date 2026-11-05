@@ -1,0 +1,5 @@
+{
+  "status": "#string",
+  "dataset": "##string",
+  "checks": "#array"
+}

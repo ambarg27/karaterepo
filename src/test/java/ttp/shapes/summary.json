@@ -1,0 +1,9 @@
+{
+  "dataset": "#string",
+  "contacts": "#number",
+  "items": "#number",
+  "requests": "#number",
+  "itemsNeedingReview": "#number",
+  "requestsByStatus": "#array",
+  "generatedAt": "#string"
+}

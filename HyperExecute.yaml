@@ -1,0 +1,23 @@
+version: 0.1
+runson: linux
+concurrency: 1
+autosplit: true
+report: true
+cacheDirectories: [".gradle/caches", "m2_cache_dir"]
+pre:
+  - chmod +x gradlew && ./gradlew clean build -x test
+testDiscovery:
+  type: raw
+  mode: remote
+  command: echo ttp.CntTest
+testRunnerCommand: ./gradlew test --tests ttp.CntTest
+uploadArtefacts:
+  - name: Karate Reports
+    path:
+      - build/karate-reports/**
+      - build/test-results/**
+partialReports:
+  location: build/karate-reports
+  type: html
+  frameworkName: karate
+jobLabel: [te33281-count-qa, karate-gitrepo]
